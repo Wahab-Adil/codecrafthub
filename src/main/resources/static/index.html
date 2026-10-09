@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>CodeCraftHub - Personalized Learning Platform</title>
+
+    <style>
+        /* -------------------------------------------------------------
+           Simple, dependency-free styling so the page works offline.
+           ------------------------------------------------------------- */
+        :root {
+            --bg: #0f172a;
+            --card: #ffffff;
+            --ink: #0f172a;
+            --muted: #64748b;
+            --line: #e2e8f0;
+            --accent: #4f46e5;
+            --ok: #16a34a;
+            --warn: #d97706;
+            --bad: #dc2626;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            color: var(--ink);
+            background: #f1f5f9;
+            line-height: 1.5;
+        }
+
+        header {
+            background: var(--bg);
+            color: #fff;
+            padding: 28px 20px;
+        }
+
+        header .wrap, main { max-width: 960px; margin: 0 auto; }
+
+        h1 { margin: 0; font-size: 1.6rem; letter-spacing: -0.02em; }
+
+        header p { margin: 6px 0 0; color: #cbd5e1; font-size: 0.95rem; }
+
+        main { padding: 24px 20px 60px; }
+
+        section {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        h2 { margin: 0 0 14px; font-size: 1.05rem; }
+
+        /* Stats */
+        .stats { display: flex; flex-wrap: wrap; gap: 12px; }
+        .stat {
+            flex: 1 1 130px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 12px;
+            background: #f8fafc;
+        }
+        .stat b { display: block; font-size: 1.5rem; line-height: 1.2; }
+        .stat span { color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; }
+
+        /* Forms */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+        label { display: block; font-size: 0.82rem; color: var(--muted); margin-bottom: 4px; }
+        input, select, button, textarea {
+            font: inherit;
+            width: 100%;
+            padding: 9px 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background: #fff;
+        }
+        textarea { resize: vertical; min-height: 60px; }
+        .full { grid-column: 1 / -1; }
+        .actions { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+        button {
+            width: auto;
+            cursor: pointer;
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+            font-weight: 600;
+        }
+        button.ghost { background: #fff; color: var(--ink); border-color: #cbd5e1; }
+        button.small { padding: 5px 10px; font-size: 0.82rem; }
+        button.danger { background: #fff; color: var(--bad); border-color: #fecaca; }
+        button:disabled { opacity: 0.55; cursor: default; }
+
+        /* Toolbar */
+        .toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+        .toolbar > div { flex: 1 1 180px; }
+
+        /* Table */
+        table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+        th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+        th { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; }
+        td.num { color: var(--muted); }
+        tr.overdue td.date { color: var(--bad); font-weight: 600; }
+        .pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+        .pill.done { background: #dcfce7; color: var(--ok); }
+        .pill.doing { background: #fef3c7; color: var(--warn); }
+        .pill.todo { background: #e2e8f0; color: #475569; }
+        select.inline { width: auto; padding: 4px 8px; font-size: 0.85rem; }
+
+        .empty, .hint { color: var(--muted); font-size: 0.9rem; }
+        .hint { margin-top: 10px; font-size: 0.82rem; }
+
+        /* Message bar */
+        #message {
+            display: none;
+            margin-bottom: 20px;
+            padding: 12px 14px;
+            border-radius: 10px;
+            font-size: 0.92rem;
+            border: 1px solid transparent;
+        }
+        #message.ok { display: block; background: #f0fdf4; border-color: #bbf7d0; color: #166534; }
+        #message.err { display: block; background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+
+        footer { max-width: 960px; margin: 0 auto; padding: 0 20px 40px; color: var(--muted); font-size: 0.82rem; }
+        code { background: #e2e8f0; padding: 1px 5px; border-radius: 4px; font-size: 0.85em; }
+    </style>
+</head>
+
+<body>
+<header>
+    <div class="wrap">
+        <h1>CodeCraftHub</h1>
+        <p>Track the courses you want to learn &mdash; target date, status and progress, stored in a plain JSON file.</p>
+    </div>
+</header>
+
+<main>
+    <!-- Feedback area: shows the API's own success/error messages -->
+    <div id="message" role="status"></div>
+
+    <section aria-labelledby="stats-heading">
+        <h2 id="stats-heading">Your learning plan</h2>
+        <div class="stats" id="stats">
+            <div class="stat"><b id="stat-total">&ndash;</b><span>Courses</span></div>
+            <div class="stat"><b id="stat-not_started">&ndash;</b><span>Not started</span></div>
+            <div class="stat"><b id="stat-in_progress">&ndash;</b><span>In progress</span></div>
+            <div class="stat"><b id="stat-completed">&ndash;</b><span>Completed</span></div>
+            <div class="stat"><b id="stat-percent">&ndash;</b><span>Complete</span></div>
+            <div class="stat"><b id="stat-overdue">&ndash;</b><span>Overdue</span></div>
+        </div>
+    </section>
+
+    <section aria-labelledby="form-heading">
+        <h2 id="form-heading"><span id="form-title">Add a course</span></h2>
+
+        <form id="course-form" novalidate>
+            <div class="grid">
+                <div class="full">
+                    <label for="name">Course name *</label>
+                    <input id="name" name="name" maxlength="120" placeholder="Spring Boot Basics" required>
+                </div>
+                <div class="full">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" maxlength="1000"
+                              placeholder="What will you learn?"></textarea>
+                </div>
+                <div>
+                    <label for="target_date">Target completion date *</label>
+                    <input id="target_date" name="target_date" type="date" required>
+                </div>
+                <div>
+                    <label for="status">Status</label>
+                    <select id="status" name="status">
+                        <option value="Not Started" selected>Not Started</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Completed">Completed</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button type="submit" id="submit-button">Add course</button>
+                <button type="button" class="ghost" id="cancel-button" hidden>Cancel edit</button>
+            </div>
+            <p class="hint">
+                Sends <code>POST /api/courses</code> (or <code>PUT /api/courses/{id}</code> while editing).
+                Fields marked * are required &mdash; the API rejects the rest with HTTP 400.
+            </p>
+        </form>
+    </section>
+
+    <section aria-labelledby="list-heading">
+        <h2 id="list-heading">Courses</h2>
+
+        <div class="toolbar">
+            <div>
+                <label for="search">Search name or description</label>
+                <input id="search" type="search" placeholder="e.g. spring">
+            </div>
+            <div>
+                <label for="filter-status">Status filter</label>
+                <select id="filter-status">
+                    <option value="">All statuses</option>
+                    <option value="Not Started">Not Started</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Completed">Completed</option>
+                </select>
+            </div>
+            <div>
+                <button type="button" class="ghost small" id="refresh-button">Refresh</button>
+            </div>
+        </div>
+
+        <table id="course-table">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Course</th>
+                <th>Target date</th>
+                <th>Status</th>
+                <th>Added</th>
+                <th aria-label="Actions"></th>
+            </tr>
+            </thead>
+            <tbody id="course-rows"></tbody>
+        </table>
+        <p class="empty" id="empty-note" hidden>No courses yet &mdash; add your first one above.</p>
+        <p class="hint">
+            Uses <code>GET /api/courses/search</code>, <code>PATCH</code>-style updates through
+            <code>PUT /api/courses/{id}</code> and <code>DELETE /api/courses/{id}</code>.
+            Red dates are overdue (not completed, target date in the past).
+        </p>
+    </section>
+</main>
+
+<footer>
+    CodeCraftHub &mdash; Spring Boot REST API with JSON file storage. Every action on this page is a plain
+    HTTP request to the same origin, so it works on any host or port the app is started on.
+</footer>
+
+<script>
+    // =====================================================================
+    //  A tiny fetch-based client for the CodeCraftHub REST API.
+    //
+    //  All URLs are relative ("/api/courses"), never "http://localhost:8080",
+    //  because this page is served BY the Spring Boot app itself
+    //  (src/main/resources/static). Relative URLs therefore keep working
+    //  behind a proxy, on another port, or on a deployed host.
+    // =====================================================================
+
+    const STATUSES = ["Not Started", "In Progress", "Completed"];
+
+    // Last courses we loaded, so a PUT can send the full record back.
+    let courses = [];
+    // Id of the course being edited, or null when the form creates a new one.
+    let editingId = null;
+
+    const $ = (id) => document.getElementById(id);
+
+    /**
+     * One place that talks to the API.
+     * Throws an Error carrying the server's own "message" when the response
+     * is not 2xx, so the user sees the real reason (404, 400, 500, ...).
+     */
+    async function api(path, options = {}) {
+        const response = await fetch(path, {
+            headers: { "Content-Type": "application/json", "Accept": "application/json" },
+            ...options
+        });
+
+        const text = await response.text();
+        const body = text ? JSON.parse(text) : null;
+
+        if (!response.ok) {
+            // ApiError shape: { timestamp, status, error, message, path, field_errors? }
+            let detail = body && body.message ? body.message : `Request failed with HTTP ${response.status}`;
+            if (body && body.field_errors) {
+                detail += " (" + Object.entries(body.field_errors)
+                    .map(([field, msg]) => `${field}: ${msg}`).join("; ") + ")";
+            }
+            throw new Error(detail);
+        }
+        return body;
+    }
+
+    // ---------------- rendering ----------------
+
+    function showMessage(text, kind) {
+        const box = $("message");
+        box.textContent = text;
+        box.className = kind;   // "ok" or "err"
+        if (kind === "ok") {
+            setTimeout(() => { box.className = ""; box.textContent = ""; }, 4000);
+        }
+    }
+
+    function pillClass(status) {
+        if (status === "Completed") return "pill done";
+        if (status === "In Progress") return "pill doing";
+        return "pill todo";
+    }
+
+    function isOverdue(course) {
+        if (course.status === "Completed" || !course.target_date) return false;
+        return new Date(course.target_date + "T23:59:59") < new Date();
+    }
+
+    function renderStats(stats) {
+        $("stat-total").textContent = stats.total;
+        $("stat-not_started").textContent = stats.not_started;
+        $("stat-in_progress").textContent = stats.in_progress;
+        $("stat-completed").textContent = stats.completed;
+        $("stat-percent").textContent = stats.completion_percentage + "%";
+        $("stat-overdue").textContent = stats.overdue;
+    }
+
+    function renderCourses(list) {
+        const tbody = $("course-rows");
+        tbody.innerHTML = "";
+        $("empty-note").hidden = list.length > 0;
+        $("course-table").style.display = list.length > 0 ? "" : "none";
+
+        for (const course of list) {
+            const tr = document.createElement("tr");
+            if (isOverdue(course)) tr.classList.add("overdue");
+
+            // Column: id
+            const tdId = document.createElement("td");
+            tdId.className = "num";
+            tdId.textContent = course.id;
+            tr.appendChild(tdId);
+
+            // Column: name + description
+            const tdName = document.createElement("td");
+            const strong = document.createElement("strong");
+            strong.textContent = course.name;
+            tdName.appendChild(strong);
+            if (course.description) {
+                const small = document.createElement("div");
+                small.className = "num";
+                small.textContent = course.description;
+                tdName.appendChild(small);
+            }
+            tr.appendChild(tdName);
+
+            // Column: target date
+            const tdDate = document.createElement("td");
+            tdDate.className = "date";
+            tdDate.textContent = course.target_date || "-";
+            tr.appendChild(tdDate);
+
+            // Column: status as an inline dropdown -> PUT on change
+            const tdStatus = document.createElement("td");
+            const select = document.createElement("select");
+            select.className = "inline";
+            select.setAttribute("aria-label", `Status of ${course.name}`);
+            for (const status of STATUSES) {
+                const option = document.createElement("option");
+                option.value = status;
+                option.textContent = status;
+                option.selected = status === course.status;
+                select.appendChild(option);
+            }
+            select.addEventListener("change", () => changeStatus(course.id, select.value));
+            tdStatus.appendChild(select);
+            tr.appendChild(tdStatus);
+
+            // Column: created_at
+            const tdCreated = document.createElement("td");
+            tdCreated.className = "num";
+            tdCreated.textContent = course.created_at || "-";
+            tr.appendChild(tdCreated);
+
+            // Column: actions
+            const tdActions = document.createElement("td");
+            const edit = document.createElement("button");
+            edit.type = "button";
+            edit.className = "ghost small";
+            edit.textContent = "Edit";
+            edit.addEventListener("click", () => startEdit(course.id));
+            const remove = document.createElement("button");
+            remove.type = "button";
+            remove.className = "danger small";
+            remove.textContent = "Delete";
+            remove.addEventListener("click", () => removeCourse(course.id, course.name));
+            tdActions.appendChild(edit);
+            tdActions.appendChild(remove);
+            tr.appendChild(tdActions);
+
+            tbody.appendChild(tr);
+        }
+    }
+
+    /** Build the query string for the current search box + status filter. */
+    function currentQueryPath() {
+        const q = $("search").value.trim();
+        const status = $("filter-status").value;
+        const params = new URLSearchParams();
+        if (q) params.set("q", q);
+        if (status) params.set("status", status);
+        const query = params.toString();
+        // With a search term or filter we use /search, otherwise the plain list.
+        return query ? `/api/courses/search?${query}` : "/api/courses";
+    }
+
+    async function refresh() {
+        try {
+            const [list, stats] = await Promise.all([
+                api(currentQueryPath()),
+                api("/api/courses/stats")
+            ]);
+            courses = list;
+            renderCourses(list);
+            renderStats(stats);
+        } catch (error) {
+            showMessage(error.message, "err");
+        }
+    }
+
+    // ---------------- mutations ----------------
+
+    function readForm() {
+        return {
+            name: $("name").value.trim(),
+            description: $("description").value.trim() || null,
+            target_date: $("target_date").value || null,
+            status: $("status").value
+        };
+    }
+
+    async function submitForm(event) {
+        event.preventDefault();
+        const payload = readForm();
+
+        if (!payload.name || !payload.target_date) {
+            showMessage("Course name and target date are required.", "err");
+            return;
+        }
+
+        try {
+            if (editingId === null) {
+                const created = await api("/api/courses", {
+                    method: "POST",
+                    body: JSON.stringify(payload)
+                });
+                showMessage(`Added "${created.name}" with id ${created.id}.`, "ok");
+            } else {
+                const updated = await api(`/api/courses/${editingId}`, {
+                    method: "PUT",
+                    body: JSON.stringify(payload)
+                });
+                showMessage(`Updated "${updated.name}" (id ${updated.id}).`, "ok");
+            }
+            resetForm();
+            await refresh();
+        } catch (error) {
+            showMessage(error.message, "err");
+        }
+    }
+
+    /**
+     * PUT replaces the whole course, so we send the stored record back with only
+     * the status changed. (Adding a real PATCH endpoint is one of the exercises
+     * in the README.)
+     */
+    async function changeStatus(id, status) {
+        const course = courses.find((c) => c.id === id);
+        if (!course) return;
+
+        try {
+            await api(`/api/courses/${id}`, {
+                method: "PUT",
+                body: JSON.stringify({
+                    name: course.name,
+                    description: course.description,
+                    target_date: course.target_date,
+                    status: status
+                })
+            });
+            showMessage(`"${course.name}" is now ${status}.`, "ok");
+            await refresh();
+        } catch (error) {
+            showMessage(error.message, "err");
+            await refresh();   // put the dropdown back in sync with the server
+        }
+    }
+
+    async function removeCourse(id, name) {
+        if (!window.confirm(`Delete "${name}" (id ${id})? This cannot be undone.`)) return;
+
+        try {
+            await api(`/api/courses/${id}`, { method: "DELETE" });
+            showMessage(`Deleted "${name}".`, "ok");
+            if (editingId === id) resetForm();
+            await refresh();
+        } catch (error) {
+            showMessage(error.message, "err");
+        }
+    }
+
+    function startEdit(id) {
+        const course = courses.find((c) => c.id === id);
+        if (!course) return;
+
+        editingId = id;
+        $("name").value = course.name;
+        $("description").value = course.description || "";
+        $("target_date").value = course.target_date || "";
+        $("status").value = course.status;
+        $("form-title").textContent = `Edit course #${id}`;
+        $("submit-button").textContent = "Save changes";
+        $("cancel-button").hidden = false;
+        $("name").focus();
+    }
+
+    function resetForm() {
+        editingId = null;
+        $("course-form").reset();
+        $("status").value = "Not Started";
+        $("form-title").textContent = "Add a course";
+        $("submit-button").textContent = "Add course";
+        $("cancel-button").hidden = true;
+    }
+
+    // ---------------- wiring ----------------
+
+    $("course-form").addEventListener("submit", submitForm);
+    $("cancel-button").addEventListener("click", resetForm);
+    $("refresh-button").addEventListener("click", refresh);
+    $("filter-status").addEventListener("change", refresh);
+    // Wait for the user to stop typing instead of firing a request per keystroke.
+    let searchTimer;
+    $("search").addEventListener("input", () => {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(refresh, 300);
+    });
+
+    // Default the date field to one month from today - a sensible target.
+    const soon = new Date();
+    soon.setMonth(soon.getMonth() + 1);
+    $("target_date").value = soon.toISOString().slice(0, 10);
+
+    refresh();
+</script>
+</body>
+</html>

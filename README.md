@@ -80,7 +80,8 @@ codecrafthub/
     │   │       ├── InvalidStatusException.java
     │   │       └── StorageException.java
     │   └── resources
-    │       └── application.properties         # port, file location, JSON style
+    │       ├── application.properties         # port, file location, JSON style
+    │       └── static/index.html              # small web UI that calls this API
     └── test/java/com/codecrafthub
         ├── CodeCraftHubApplicationTests.java  # does the app start?
         ├── model/CourseStatusTest.java        # status parsing + JSON shape
@@ -293,7 +294,31 @@ This design is deliberately the simplest thing that is correct. Writing the whol
 on every change is fine for dozens or hundreds of courses; it would not survive
 thousands of concurrent users - that is exactly the problem a real database solves.
 
-## 7. Tests
+## 7. The web page
+
+Open **http://localhost:8080/** in your browser while the app is running.
+
+`src/main/resources/static/index.html` is a single dependency-free page that Spring
+Boot serves automatically (anything in `static/` is exposed at the web root). It lets
+you add, edit, filter, re-status and delete courses, and shows the stats - by sending
+exactly the same HTTP requests documented above. It is worth reading its JavaScript
+with the API reference open, because it is a worked example of calling a REST API:
+
+* **Relative URLs only** (`/api/courses`, never `http://localhost:8080/...`), so the
+  page keeps working on any port, host or proxy.
+* One `api()` helper that checks `response.ok` and turns the server's `ApiError`
+  body into a readable message - which is why the consistent error shape from
+  section 5 pays off.
+* Changing a status dropdown sends a full `PUT`, since PUT replaces the whole
+  resource. That is the main reason to add a real `PATCH` endpoint later.
+
+The `<title>` tag of that page is:
+
+```html
+<title>CodeCraftHub - Personalized Learning Platform</title>
+```
+
+## 8. Tests
 
 ```bash
 mvn test
@@ -310,7 +335,7 @@ mvn test
 All tests write into a temporary folder or the system temp directory, so your
 `courses.json` is never touched.
 
-## 8. Notes on the versions used here
+## 9. Notes on the versions used here
 
 If you compare this project with online tutorials you will see two differences, both
 because it uses **Spring Boot 4.1** (released after most tutorials were written):
@@ -330,7 +355,7 @@ To build the same project on Spring Boot 3.5 instead: change the parent version,
 `spring-boot-starter-webmvc` for `spring-boot-starter-web`, and change the two Jackson
 imports (`tools.jackson.*` -> `com.fasterxml.jackson.*`).
 
-## 9. Ideas for the next step
+## 10. Ideas for the next step
 
 Good practice exercises, roughly in order of difficulty:
 
@@ -344,5 +369,6 @@ Good practice exercises, roughly in order of difficulty:
    the real file so a crash can never leave a half-written file behind.
 7. Introduce a `CourseRepository` interface so a JPA/database implementation can be
    added next to the JSON one and selected with a Spring profile.
-8. Add a tiny HTML/JavaScript front page under `src/main/resources/static` that calls
-   this API with `fetch()`.
+8. Grow the web page in `src/main/resources/static/index.html`: a progress bar driven
+   by `completion_percentage`, or an "upcoming deadlines" panel fed by the endpoint
+   from idea 5.
