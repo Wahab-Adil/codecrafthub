@@ -311,6 +311,9 @@ with the API reference open, because it is a worked example of calling a REST AP
   section 5 pays off.
 * Changing a status dropdown sends a full `PUT`, since PUT replaces the whole
   resource. That is the main reason to add a real `PATCH` endpoint later.
+* Styling lives in one `<style>` block. The main action button uses the
+  `.btn-primary` class - restyle it (or change `--accent` in `:root`) to re-brand the
+  page without touching the markup.
 
 The `<title>` tag of that page is:
 
