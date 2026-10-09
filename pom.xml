@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!--
+        The "parent" POM is Spring Boot itself. It does two useful jobs for us:
+          1. It picks compatible versions of every library (so we never write a
+             <version> for a Spring Boot starter).
+          2. It configures the Java compiler and the spring-boot-maven-plugin,
+             which is what makes `mvn spring-boot:run` work.
+    -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>4.1.1</version>
+        <relativePath/> <!-- lookup parent from the repository, not from a local folder -->
+    </parent>
+
+    <groupId>com.codecrafthub</groupId>
+    <artifactId>codecrafthub</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>CodeCraftHub</name>
+    <description>Personalized learning platform: track the courses you want to learn</description>
+
+    <properties>
+        <!-- Spring Boot 4.1 needs Java 17 or newer. 21 is the current LTS release. -->
+        <java.version>21</java.version>
+    </properties>
+
+    <dependencies>
+        <!--
+            Spring MVC + embedded Tomcat + Jackson (JSON). This single starter is
+            all we need to expose a REST API on http://localhost:8080.
+            NOTE: in Spring Boot 4 this starter replaces the old
+            `spring-boot-starter-web`, which is now deprecated.
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webmvc</artifactId>
+        </dependency>
+
+        <!-- Bean Validation (@NotBlank, @NotNull, @Size ...) so bad input is rejected with HTTP 400 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
+        <!-- JUnit 5, AssertJ, JSONassert and friends (test code only, never shipped) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Adds `mvn spring-boot:run` and builds an executable jar with `mvn package` -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

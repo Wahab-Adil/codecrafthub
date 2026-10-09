@@ -1,0 +1,25 @@
+# --- Build output ---
+target/
+build/
+
+# --- Runtime data: the JSON "database" is created by the app, not version controlled ---
+courses.json
+*.json.tmp
+
+# --- IDE files ---
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.classpath
+.project
+.factorypath
+
+# --- OS files ---
+.DS_Store
+Thumbs.db
+
+# --- Logs ---
+*.log

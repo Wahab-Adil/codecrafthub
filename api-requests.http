@@ -1,0 +1,145 @@
+### ============================================================================
+### CodeCraftHub - every endpoint as a runnable request.
+###
+### How to use:
+###   1. Start the app:  mvn spring-boot:run
+###   2. Open this file in IntelliJ IDEA (built-in HTTP client) or in VS Code
+###      with the "REST Client" extension, then click "Send Request" above any
+###      request. The requests are ordered so you can run them top to bottom.
+###
+### Prefer the command line? The README has the equivalent curl command for each
+### of these requests.
+### ============================================================================
+
+@host = http://localhost:8080
+
+
+### 1. List courses - empty the very first time
+GET {{host}}/api/courses
+
+
+### 2. Create a course (status omitted -> defaults to "Not Started")
+# @name createPython
+POST {{host}}/api/courses
+Content-Type: application/json
+
+{
+  "name": "Python Basics",
+  "description": "Learn Python fundamentals",
+  "target_date": "2026-12-31"
+}
+
+
+### 3. Create a second course, already in progress
+# @name createSpring
+POST {{host}}/api/courses
+Content-Type: application/json
+
+{
+  "name": "Spring Boot Basics",
+  "description": "Learn to build REST APIs with Spring Boot",
+  "target_date": "2026-11-30",
+  "status": "In Progress"
+}
+
+
+### 4. Create a third course that is already finished
+POST {{host}}/api/courses
+Content-Type: application/json
+
+{
+  "name": "Git and GitHub",
+  "description": "Version control in practice",
+  "target_date": "2026-10-01",
+  "status": "Completed"
+}
+
+
+### 5. Read one course by id (try the id returned by request 2)
+GET {{host}}/api/courses/1
+
+
+### 6. List only the courses in progress
+GET {{host}}/api/courses?status=In Progress
+
+
+### 7. Search in name and description (case-insensitive)
+GET {{host}}/api/courses/search?q=spring
+
+
+### 8. Search with a status filter as well
+GET {{host}}/api/courses/search?q=&status=Completed
+
+
+### 9. Statistics for the whole learning plan
+GET {{host}}/api/courses/stats
+
+
+### 10. Update a course: PUT replaces the editable fields
+PUT {{host}}/api/courses/1
+Content-Type: application/json
+
+{
+  "name": "Python Basics",
+  "description": "Halfway through - now doing the exercises",
+  "target_date": "2027-01-31",
+  "status": "In Progress"
+}
+
+
+### 11. Delete a course -> 204 No Content
+DELETE {{host}}/api/courses/3
+
+
+### ============================================================================
+### Error cases - these are supposed to fail, that is the point.
+### ============================================================================
+
+### 12. Unknown id -> 404 with a JSON error body
+GET {{host}}/api/courses/9999
+
+
+### 13. Id that is not a number -> 400
+GET {{host}}/api/courses/abc
+
+
+### 14. Missing and blank required fields -> 400 with field_errors
+POST {{host}}/api/courses
+Content-Type: application/json
+
+{
+  "name": "   ",
+  "target_date": null
+}
+
+
+### 15. Status that does not exist -> 400
+POST {{host}}/api/courses
+Content-Type: application/json
+
+{
+  "name": "Mystery Course",
+  "target_date": "2026-12-31",
+  "status": "Finished"
+}
+
+
+### 16. Unknown status used as a filter -> 400
+GET {{host}}/api/courses?status=Finished
+
+
+### 17. Body that is not valid JSON -> 400
+POST {{host}}/api/courses
+Content-Type: application/json
+
+{ "name": "broken"
+
+
+### 18. Wrong date format -> 400 (expected: yyyy-MM-dd)
+POST {{host}}/api/courses
+Content-Type: application/json
+
+{
+  "name": "Wrong Date Course",
+  "target_date": "31/12/2026"
+}
