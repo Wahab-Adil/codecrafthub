@@ -56,11 +56,14 @@ codecrafthub/
 ├── pom.xml                                    # Maven build + dependencies
 ├── courses.json                               # the "database" (created on first run, git-ignored)
 ├── api-requests.http                          # every endpoint as a runnable request
+├── dashboard.html                             # CRUD dashboard (Part 2) - open with Live Server
 ├── README.md
 └── src
     ├── main
     │   ├── java/com/codecrafthub
     │   │   ├── CodeCraftHubApplication.java   # entry point (@SpringBootApplication)
+    │   │   ├── config
+    │   │   │   └── WebConfig.java             # CORS, so the dashboard can call the API
     │   │   ├── controller
     │   │   │   └── CourseController.java      # the REST endpoints (HTTP in, HTTP out)
     │   │   ├── service
@@ -294,7 +297,48 @@ This design is deliberately the simplest thing that is correct. Writing the whol
 on every change is fine for dozens or hundreds of courses; it would not survive
 thousands of concurrent users - that is exactly the problem a real database solves.
 
-## 7. The web page
+## 7. The two web pages
+
+Both pages are single HTML files with embedded CSS and JavaScript - no frameworks, no
+build step, no database in the browser.
+
+### 7.1 `dashboard.html` - the CRUD dashboard (Final Project Part 2)
+
+`dashboard.html` sits in the project root next to `pom.xml`. It is the course
+management interface: a table of every course, an **Add Course** form at the top, an
+**edit modal**, **Remove** buttons, a loading spinner while data is in flight,
+success/error banners for every operation, client-side validation of the required
+fields, and a layout that collapses into cards on a phone.
+
+Colour theme from the project brief: `#8B5CF6` primary (`.btn-primary`), `#F59E0B`
+success, `#EF4444` delete. Its header reads
+"CodeCraftHub: Your Learning Management Platform".
+
+To run it:
+
+1. Start the backend first - the dashboard only ever talks to the API:
+   `mvn spring-boot:run`
+2. Serve the page with any static web server. In VS Code or the Skills Network lab:
+   right-click `dashboard.html` -> **Open with Live Server**, and note the port it
+   reports (5500 is typical). Double-clicking the file also works.
+3. Add, edit, remove and refresh courses. Everything is stored in `courses.json` by
+   the backend.
+
+**Why `config/WebConfig.java` exists.** A page served from `http://localhost:5500`
+that calls an API on `http://localhost:8080` is a *cross-origin* request - a different
+port is a different origin - and browsers block it unless the API opts in with CORS
+headers. `WebConfig` declares `/api/**` cross-origin, which is what lets the dashboard
+work from Live Server. Without it, every `fetch` dies in the browser console with
+`... has been blocked by CORS policy`. (Open the page from 7.2 instead and the origins
+match, so CORS never comes into it.)
+
+The backend address is one constant at the top of the `<script>` block:
+
+```js
+const BACKEND_ORIGIN = "http://localhost:8080";   // change this if your API runs elsewhere
+```
+
+### 7.2 `src/main/resources/static/index.html` - served by the app itself
 
 Open **http://localhost:8080/** in your browser while the app is running.
 
@@ -333,7 +377,7 @@ mvn test
 | `CourseStatusTest` | status text is parsed leniently; JSON uses `target_date`, `created_at` and `"In Progress"` | no |
 | `JsonCourseRepositoryTest` | ids increase, updates replace instead of duplicate, deletes work, the file really contains snake_case JSON, broken JSON fails clearly | no |
 | `CourseServiceTest` | defaults, trimming, 404 rules, filtering, searching, stats maths | no |
-| `CourseApiIntegrationTest` | the real API over HTTP: status codes, `Location` header, error bodies, persistence | yes (random port) |
+| `CourseApiIntegrationTest` | the real API over HTTP: status codes, `Location` header, error bodies, persistence, CORS | yes (random port) |
 
 All tests write into a temporary folder or the system temp directory, so your
 `courses.json` is never touched.

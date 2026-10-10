@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>CodeCraftHub: Your Learning Management Platform</title>
+
+    <style>
+        /* =================================================================
+           CodeCraftHub dashboard - plain CSS, no frameworks.
+
+           Theme (from the project brief):
+             #8B5CF6  primary   (buttons, links, focus rings)
+             #F59E0B  success   (confirmations, "In Progress" badge)
+             #EF4444  delete    (destructive actions, error messages)
+           ================================================================= */
+        :root {
+            --primary: #8B5CF6;
+            --primary-dark: #7C3AED;
+            --primary-soft: #C4B5FD;
+            --primary-wash: #F5F3FF;
+            --success: #F59E0B;
+            --success-wash: #FFFBEB;
+            --danger: #EF4444;
+            --danger-dark: #DC2626;
+            --danger-wash: #FEF2F2;
+            --ink: #1F2937;
+            --muted: #6B7280;
+            --line: #E5E7EB;
+            --surface: #FFFFFF;
+            --page: #F9FAFB;
+            --radius: 10px;
+            --shadow: 0 1px 3px rgba(16, 24, 40, 0.08), 0 1px 2px rgba(16, 24, 40, 0.04);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+            background: var(--page);
+            color: var(--ink);
+            line-height: 1.55;
+        }
+
+        /* ---------- header ---------- */
+        .app-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: #FFFFFF;
+            padding: 28px 20px;
+        }
+
+        .app-header h1 {
+            margin: 0;
+            font-size: 1.55rem;
+            letter-spacing: -0.01em;
+        }
+
+        .app-header p {
+            margin: 6px 0 0;
+            color: #EDE9FE;
+            font-size: 0.95rem;
+        }
+
+        .container {
+            max-width: 1040px;
+            margin: 0 auto;
+            padding: 24px 20px 56px;
+        }
+
+        /* ---------- cards / sections ---------- */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 22px;
+            margin-bottom: 22px;
+        }
+
+        .card h2 {
+            margin: 0 0 16px;
+            font-size: 1.1rem;
+        }
+
+        .list-head {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+
+        .list-head h2 { margin: 0; }
+        .list-head .spacer { flex: 1 1 auto; }
+
+        .count {
+            background: var(--primary-wash);
+            color: var(--primary-dark);
+            border-radius: 999px;
+            padding: 2px 12px;
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+
+        /* ---------- forms ---------- */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .field-full { grid-column: 1 / -1; }
+
+        label {
+            display: block;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--muted);
+            margin-bottom: 5px;
+        }
+
+        label .req { color: var(--danger); }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            font: inherit;
+            font-size: 0.95rem;
+            color: var(--ink);
+            background: #FFFFFF;
+            border: 1px solid #D1D5DB;
+            border-radius: 8px;
+        }
+
+        textarea { resize: vertical; min-height: 74px; }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+        }
+
+        input.invalid, select.invalid, textarea.invalid {
+            border-color: var(--danger);
+            background: var(--danger-wash);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 18px;
+        }
+
+        /* ---------- buttons ---------- */
+        .btn-primary, .btn-secondary, .btn-danger, .btn-small {
+            font: inherit;
+            font-size: 0.92rem;
+            border-radius: 8px;
+            padding: 10px 18px;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+
+        .btn-primary {
+            background-color: #8B5CF6;
+            color: #FFFFFF;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #7C3AED;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.35);
+        }
+
+        .btn-primary:active { transform: translateY(1px); }
+
+        .btn-primary:disabled {
+            background-color: #C4B5FD;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background: #FFFFFF;
+            color: var(--ink);
+            border-color: #D1D5DB;
+        }
+
+        .btn-secondary:hover { background: #F3F4F6; }
+
+        .btn-danger {
+            background: #FFFFFF;
+            color: var(--danger);
+            border-color: #FCA5A5;
+        }
+
+        .btn-danger:hover { background: var(--danger-wash); border-color: var(--danger); }
+
+        .btn-small { padding: 6px 12px; font-size: 0.82rem; }
+
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        /* ---------- messages ---------- */
+        .message {
+            border-radius: var(--radius);
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            font-size: 0.93rem;
+            border: 1px solid transparent;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .message[hidden] { display: none; }
+
+        .message.success {
+            background: var(--success-wash);
+            border-color: #FCD34D;
+            color: #92400E;
+        }
+
+        .message.error {
+            background: var(--danger-wash);
+            border-color: #FCA5A5;
+            color: #991B1B;
+        }
+
+        /* ---------- spinner ---------- */
+        .spinner {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--muted);
+            font-size: 0.92rem;
+            padding: 18px 0;
+        }
+
+        .spinner[hidden] { display: none; }
+
+        .spinner-ring {
+            width: 26px;
+            height: 26px;
+            border: 3px solid var(--primary-soft);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ---------- table ---------- */
+        .table-wrap { overflow-x: auto; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+
+        thead th {
+            text-align: left;
+            font-size: 0.74rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--muted);
+            border-bottom: 2px solid var(--line);
+            padding: 10px 12px;
+            white-space: nowrap;
+        }
+
+        tbody td {
+            padding: 13px 12px;
+            border-bottom: 1px solid var(--line);
+            vertical-align: top;
+        }
+
+        tbody tr:hover { background: var(--primary-wash); }
+        tbody tr.overdue td.col-date { color: var(--danger-dark); font-weight: 600; }
+
+        td.col-id { color: var(--muted); }
+        td.col-name { font-weight: 600; }
+        td.col-desc { color: var(--muted); max-width: 260px; }
+        td.col-actions { white-space: nowrap; text-align: right; }
+        td.col-actions button + button { margin-left: 6px; }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 11px;
+            border-radius: 999px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .badge-not-started { background: #E5E7EB; color: #374151; }
+        .badge-in-progress { background: var(--success-wash); color: #B45309; border: 1px solid #FCD34D; }
+        .badge-completed { background: #ECFDF5; color: #047857; border: 1px solid #6EE7B7; }
+
+        .empty { color: var(--muted); font-size: 0.93rem; padding: 10px 0 0; }
+        .empty[hidden] { display: none; }
+
+        td.col-added { color: var(--muted); white-space: nowrap; }
+
+        /* Visible to screen readers only (the "Actions" column has no text header). */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        .hint { color: var(--muted); font-size: 0.8rem; margin: 14px 0 0; }
+
+        code {
+            background: #F3F4F6;
+            border: 1px solid var(--line);
+            border-radius: 4px;
+            padding: 1px 5px;
+            font-size: 0.85em;
+        }
+
+        /* ---------- modal ---------- */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(17, 24, 39, 0.55);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 50;
+        }
+
+        .modal-backdrop[hidden] { display: none; }
+
+        .modal {
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: 0 20px 45px rgba(16, 24, 40, 0.28);
+            width: 100%;
+            max-width: 560px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        .modal h2 { margin: 0 0 4px; font-size: 1.15rem; }
+        .modal .modal-sub { color: var(--muted); font-size: 0.85rem; margin: 0 0 18px; }
+        .modal .form-grid { grid-template-columns: 1fr; }
+        .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+        footer {
+            max-width: 1040px;
+            margin: 0 auto;
+            padding: 0 20px 40px;
+            color: var(--muted);
+            font-size: 0.8rem;
+        }
+
+        /* ---------- responsive ---------- */
+        @media (max-width: 720px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .app-header h1 { font-size: 1.25rem; }
+
+            /* Turn each table row into a small card, labelling every value. */
+            thead { display: none; }
+            table, tbody, tr, td { display: block; width: 100%; }
+
+            tbody tr {
+                border: 1px solid var(--line);
+                border-radius: var(--radius);
+                padding: 6px 12px 12px;
+                margin-bottom: 12px;
+                background: var(--surface);
+            }
+
+            tbody td {
+                display: flex;
+                justify-content: space-between;
+                gap: 14px;
+                border-bottom: 1px dashed var(--line);
+                padding: 8px 0;
+                text-align: right;
+            }
+
+            tbody td::before {
+                content: attr(data-label);
+                font-size: 0.74rem;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                color: var(--muted);
+                font-weight: 700;
+                text-align: left;
+                flex: 0 0 40%;
+            }
+
+            td.col-desc { max-width: none; }
+            td.col-actions { justify-content: flex-end; }
+            td.col-actions::before { content: ""; flex: 0 0 0; }
+            .modal-actions { justify-content: stretch; flex-direction: column-reverse; }
+            .modal-actions button { width: 100%; }
+        }
+    </style>
+</head>
+
+<body>
+<header class="app-header">
+    <h1>CodeCraftHub: Your Learning Management Platform</h1>
+    <p>Track the courses you want to learn &mdash; create, review, update and remove them through the CodeCraftHub REST API.</p>
+</header>
+
+<main class="container">
+
+    <!-- Success / error feedback for every operation -->
+    <div id="message" class="message" role="status" hidden></div>
+
+    <!-- ============ CREATE ============ -->
+    <section class="card" aria-labelledby="add-heading">
+        <h2 id="add-heading">Add Course</h2>
+
+        <form id="course-form" novalidate>
+            <div class="form-grid">
+                <div class="field-full">
+                    <label for="name">Course name <span class="req">*</span></label>
+                    <input id="name" name="name" type="text" maxlength="120"
+                           placeholder="Spring Boot Basics" autocomplete="off">
+                </div>
+
+                <div class="field-full">
+                    <label for="description">Description <span class="req">*</span></label>
+                    <textarea id="description" name="description" maxlength="1000"
+                              placeholder="What will you learn in this course?"></textarea>
+                </div>
+
+                <div>
+                    <label for="target_date">Target completion date <span class="req">*</span></label>
+                    <input id="target_date" name="target_date" type="date">
+                </div>
+
+                <div>
+                    <label for="status">Status <span class="req">*</span></label>
+                    <select id="status" name="status">
+                        <option value="Not Started" selected>Not Started</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Completed">Completed</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-primary" id="add-button">Add Course</button>
+                <button type="reset" class="btn-secondary" id="clear-button">Clear</button>
+            </div>
+
+            <p class="hint">
+                Sends <code>POST /api/courses</code>. The backend assigns <code>id</code> and
+                <code>created_at</code> and answers <code>201 Created</code>.
+            </p>
+        </form>
+    </section>
+
+    <!-- ============ READ ============ -->
+    <section class="card" aria-labelledby="list-heading">
+        <div class="list-head">
+            <h2 id="list-heading">Your Courses</h2>
+            <span id="course-count" class="count" hidden></span>
+            <span class="spacer"></span>
+            <button type="button" class="btn-secondary btn-small" id="refresh-button">Refresh</button>
+        </div>
+
+        <div id="spinner" class="spinner" hidden>
+            <span class="spinner-ring" aria-hidden="true"></span>
+            <span id="spinner-text">Loading courses&hellip;</span>
+        </div>
+
+        <div class="table-wrap">
+            <table id="course-table">
+                <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Target date</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Added</th>
+                    <th scope="col"><span class="sr-only">Actions</span></th>
+                </tr>
+                </thead>
+                <tbody id="course-body"></tbody>
+            </table>
+        </div>
+
+        <p id="empty" class="empty" hidden>
+            No courses yet. Add your first one above &mdash; it will be stored in
+            <code>courses.json</code> on the server.
+        </p>
+
+        <p class="hint">
+            Red target dates are overdue: the course is not completed and its date has passed.
+            Edit opens a modal and sends <code>PUT /api/courses/{id}</code>;
+            Remove sends <code>DELETE /api/courses/{id}</code> and expects <code>204 No Content</code>.
+        </p>
+    </section>
+</main>
+
+<!-- ============ UPDATE (modal) ============ -->
+<div id="modal-backdrop" class="modal-backdrop" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <h2 id="modal-title">Edit Course</h2>
+        <p class="modal-sub" id="modal-sub"></p>
+
+        <form id="edit-form" novalidate>
+            <div class="form-grid">
+                <div>
+                    <label for="edit-name">Course name <span class="req">*</span></label>
+                    <input id="edit-name" type="text" maxlength="120" autocomplete="off">
+                </div>
+                <div>
+                    <label for="edit-description">Description <span class="req">*</span></label>
+                    <textarea id="edit-description" maxlength="1000"></textarea>
+                </div>
+                <div>
+                    <label for="edit-target_date">Target completion date <span class="req">*</span></label>
+                    <input id="edit-target_date" type="date">
+                </div>
+                <div>
+                    <label for="edit-status">Status <span class="req">*</span></label>
+                    <select id="edit-status">
+                        <option value="Not Started">Not Started</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Completed">Completed</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" id="cancel-edit-button">Cancel</button>
+                <button type="submit" class="btn-primary" id="save-edit-button">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<footer>
+    CodeCraftHub dashboard &mdash; one HTML file with embedded CSS and JavaScript, no frameworks,
+    talking to the Spring Boot REST API. Data lives in <code>courses.json</code> on the server;
+    there is no database and no login.
+</footer>
+
+<script>
+    /* =====================================================================
+       CodeCraftHub dashboard logic - vanilla JavaScript only.
+
+       Every function below maps to one REST operation:
+         loadCourses()  -> GET    /api/courses
+         createCourse() -> POST   /api/courses
+         updateCourse() -> PUT    /api/courses/{id}
+         deleteCourse() -> DELETE /api/courses/{id}
+       ===================================================================== */
+
+    // ---------------------------------------------------------------------
+    // Where the backend lives
+    // ---------------------------------------------------------------------
+    // Change this if your API runs on another port or machine.
+    const BACKEND_ORIGIN = "http://localhost:8080";
+
+    // If this page is served by the Spring Boot app itself, relative URLs work
+    // and no CORS is involved. Opened from Live Server (or a file), the page has
+    // a different origin, so we call the backend URL above directly.
+    const SERVED_BY_BACKEND = window.location.origin === BACKEND_ORIGIN;
+    const API_BASE = (SERVED_BY_BACKEND ? "" : BACKEND_ORIGIN) + "/api/courses";
+
+    const STATUSES = ["Not Started", "In Progress", "Completed"];
+
+    // The courses we last loaded, so the edit modal can pre-fill a full record.
+    let courses = [];
+    // Id of the course being edited, or null when the modal is closed.
+    let editingId = null;
+
+    // Small helper: document.getElementById without the typing.
+    const $ = (id) => document.getElementById(id);
+
+    // ---------------------------------------------------------------------
+    // Talking to the API
+    // ---------------------------------------------------------------------
+
+    /**
+     * Performs one HTTP request against the API and returns the parsed body.
+     *
+     * Throws an Error with a user-friendly message when:
+     *   - the backend cannot be reached at all (not running, wrong port), or
+     *   - the backend answers 4xx/5xx. The CodeCraftHub API always returns a
+     *     JSON error body { timestamp, status, error, message, path,
+     *     field_errors? }, so we show its own message plus any field details.
+     */
+    async function api(path, options = {}) {
+        let response;
+        try {
+            response = await fetch(path, Object.assign({
+                headers: { "Content-Type": "application/json", "Accept": "application/json" }
+            }, options));
+        } catch (networkError) {
+            throw new Error(
+                "Cannot reach the CodeCraftHub API at " + API_BASE +
+                ". Is the backend running (mvn spring-boot:run)?"
+            );
+        }
+
+        const text = await response.text();
+        let body = null;
+        if (text) {
+            try {
+                body = JSON.parse(text);
+            } catch (parseError) {
+                body = null;   // not JSON (a proxy error page, for example)
+            }
+        }
+
+        if (!response.ok) {
+            let detail = (body && body.message)
+                ? body.message
+                : "Request failed with HTTP " + response.status + " " + response.statusText;
+            if (body && body.field_errors) {
+                const fields = Object.keys(body.field_errors)
+                    .map((field) => field + ": " + body.field_errors[field])
+                    .join("; ");
+                detail += " (" + fields + ")";
+            }
+            throw new Error(detail);
+        }
+
+        return body;
+    }
+
+    // ---------------------------------------------------------------------
+    // UI state: spinner and messages
+    // ---------------------------------------------------------------------
+
+    /** Shows or hides the loading spinner and disables the buttons meanwhile. */
+    function setLoading(isLoading, text) {
+        $("spinner").hidden = !isLoading;
+        if (text) $("spinner-text").textContent = text;
+        else $("spinner-text").textContent = "Loading courses\u2026";
+
+        $("add-button").disabled = isLoading;
+        $("refresh-button").disabled = isLoading;
+        $("save-edit-button").disabled = isLoading;
+    }
+
+    /** Shows a success (amber) or error (red) banner. Success fades away. */
+    function showMessage(text, type) {
+        const box = $("message");
+        box.textContent = text;
+        box.className = "message " + (type === "error" ? "error" : "success");
+        box.hidden = false;
+
+        clearTimeout(showMessage.timer);
+        if (type !== "error") {
+            showMessage.timer = setTimeout(() => { box.hidden = true; }, 4000);
+        }
+    }
+
+    const hideMessage = () => { $("message").hidden = true; };
+
+    // ---------------------------------------------------------------------
+    // Formatting helpers
+    // ---------------------------------------------------------------------
+
+    /** "2026-10-09 10:30:00" (the API format) -> "9 Oct 2026, 10:30". */
+    function formatDateTime(value) {
+        if (!value) return "-";
+        // Safari does not accept "yyyy-MM-dd HH:mm:ss", so normalise to ISO first.
+        const date = new Date(value.replace(" ", "T"));
+        if (isNaN(date.getTime())) return value;
+        return date.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+    }
+
+    /** true when the course is unfinished and its target date has passed. */
+    function isOverdue(course) {
+        if (!course.target_date || course.status === "Completed") return false;
+        // Compare end-of-day so a course due today is not marked overdue.
+        const endOfTargetDay = new Date(course.target_date + "T23:59:59");
+        return endOfTargetDay.getTime() < Date.now();
+    }
+
+    function badgeClassFor(status) {
+        if (status === "Completed") return "badge badge-completed";
+        if (status === "In Progress") return "badge badge-in-progress";
+        return "badge badge-not-started";
+    }
+
+    // ---------------------------------------------------------------------
+    // READ: GET /api/courses
+    // ---------------------------------------------------------------------
+
+    async function loadCourses() {
+        setLoading(true, "Loading courses\u2026");
+        hideMessage();
+        try {
+            courses = await api(API_BASE) || [];
+            renderCourses();
+        } catch (error) {
+            showMessage(error.message, "error");
+            courses = [];
+            renderCourses();
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    /** Draws the table body from the `courses` array. */
+    function renderCourses() {
+        const tbody = $("course-body");
+        tbody.innerHTML = "";
+
+        const hasCourses = courses.length > 0;
+        $("empty").hidden = hasCourses;
+        $("course-table").style.display = hasCourses ? "" : "none";
+        $("course-count").hidden = !hasCourses;
+        if (hasCourses) {
+            $("course-count").textContent =
+                courses.length + (courses.length === 1 ? " course" : " courses");
+        }
+
+        for (const course of courses) {
+            const row = document.createElement("tr");
+            if (isOverdue(course)) row.classList.add("overdue");
+
+            row.appendChild(cell("col-id", "ID", course.id));
+            row.appendChild(cell("col-name", "Name", course.name));
+            row.appendChild(cell("col-desc", "Description", course.description || "-"));
+            row.appendChild(cell("col-date", "Target date", course.target_date || "-"));
+
+            // Status as a coloured badge.
+            const statusCell = document.createElement("td");
+            statusCell.setAttribute("data-label", "Status");
+            const badge = document.createElement("span");
+            badge.className = badgeClassFor(course.status);
+            badge.textContent = course.status || "Not Started";
+            statusCell.appendChild(badge);
+            row.appendChild(statusCell);
+
+            row.appendChild(cell("col-added", "Added", formatDateTime(course.created_at)));
+
+            // Action buttons.
+            const actions = document.createElement("td");
+            actions.className = "col-actions";
+            actions.setAttribute("data-label", "Actions");
+
+            const editButton = document.createElement("button");
+            editButton.type = "button";
+            editButton.className = "btn-secondary btn-small";
+            editButton.textContent = "Edit";
+            editButton.addEventListener("click", () => openEditModal(course.id));
+
+            const deleteButton = document.createElement("button");
+            deleteButton.type = "button";
+            deleteButton.className = "btn-danger btn-small";
+            deleteButton.textContent = "Remove";
+            deleteButton.addEventListener("click", () => deleteCourse(course.id, course.name));
+
+            actions.appendChild(editButton);
+            actions.appendChild(deleteButton);
+            row.appendChild(actions);
+
+            tbody.appendChild(row);
+        }
+    }
+
+    /** Builds one <td> using textContent, so nothing a user typed becomes HTML. */
+    function cell(className, label, text) {
+        const td = document.createElement("td");
+        td.className = className;
+        td.setAttribute("data-label", label);
+        td.textContent = text;
+        return td;
+    }
+
+    // ---------------------------------------------------------------------
+    // CREATE: POST /api/courses
+    // ---------------------------------------------------------------------
+
+    async function createCourse(event) {
+        event.preventDefault();
+
+        const payload = {
+            name: $("name").value.trim(),
+            description: $("description").value.trim(),
+            target_date: $("target_date").value,
+            status: $("status").value
+        };
+
+        const problem = validate(payload, ["name", "description", "target_date", "status"]);
+        if (problem) {
+            showMessage(problem, "error");
+            markEmptyFields("", payload, ["name", "description", "target_date"]);
+            return;
+        }
+
+        setLoading(true, "Saving course\u2026");
+        try {
+            const created = await api(API_BASE, {
+                method: "POST",
+                body: JSON.stringify(payload)
+            });
+            showMessage('Added "' + created.name + '" (id ' + created.id + ").", "success");
+            $("course-form").reset();
+            $("status").value = "Not Started";
+            setDefaultTargetDate();
+            await loadCourses();
+        } catch (error) {
+            showMessage(error.message, "error");
+            setLoading(false);
+        }
+    }
+
+    // ---------------------------------------------------------------------
+    // UPDATE: PUT /api/courses/{id}
+    // ---------------------------------------------------------------------
+
+    /** Opens the modal pre-filled with one stored course. */
+    function openEditModal(id) {
+        const course = courses.find((item) => item.id === id);
+        if (!course) {
+            showMessage("That course is no longer in the list - refreshing.", "error");
+            loadCourses();
+            return;
+        }
+
+        editingId = id;
+        $("edit-name").value = course.name || "";
+        $("edit-description").value = course.description || "";
+        $("edit-target_date").value = course.target_date || "";
+        $("edit-status").value = STATUSES.includes(course.status) ? course.status : "Not Started";
+        $("modal-sub").textContent =
+            "Course #" + id + " - added " + formatDateTime(course.created_at);
+        $("modal-backdrop").hidden = false;
+        $("edit-name").focus();
+    }
+
+    function closeEditModal() {
+        editingId = null;
+        $("modal-backdrop").hidden = true;
+    }
+
+    async function updateCourse(event) {
+        event.preventDefault();
+        if (editingId === null) return;
+
+        const payload = {
+            name: $("edit-name").value.trim(),
+            description: $("edit-description").value.trim(),
+            target_date: $("edit-target_date").value,
+            status: $("edit-status").value
+        };
+
+        const problem = validate(payload, ["name", "description", "target_date", "status"]);
+        if (problem) {
+            showMessage(problem, "error");
+            markEmptyFields("edit-", payload, ["name", "description", "target_date"]);
+            return;
+        }
+
+        setLoading(true, "Saving changes\u2026");
+        try {
+            // PUT replaces the whole course, so we always send every field.
+            const updated = await api(API_BASE + "/" + editingId, {
+                method: "PUT",
+                body: JSON.stringify(payload)
+            });
+            closeEditModal();
+            showMessage('Updated "' + updated.name + '" (id ' + updated.id + ").", "success");
+            await loadCourses();
+        } catch (error) {
+            showMessage(error.message, "error");
+            setLoading(false);
+        }
+    }
+
+    // ---------------------------------------------------------------------
+    // DELETE: DELETE /api/courses/{id}
+    // ---------------------------------------------------------------------
+
+    async function deleteCourse(id, name) {
+        const confirmed = window.confirm('Remove "' + name + '" (id ' + id + ")? This cannot be undone.");
+        if (!confirmed) return;
+
+        setLoading(true, "Removing course\u2026");
+        try {
+            await api(API_BASE + "/" + id, { method: "DELETE" });
+            showMessage('Removed "' + name + '".', "success");
+            await loadCourses();
+        } catch (error) {
+            showMessage(error.message, "error");
+            setLoading(false);
+        }
+    }
+
+    // ---------------------------------------------------------------------
+    // Validation (client side - the API validates again, and says so)
+    // ---------------------------------------------------------------------
+
+    /**
+     * Returns a message describing the first problem, or null when the payload
+     * is complete. Mirrors the API's own rules: name and description required,
+     * target_date required in YYYY-MM-DD, status one of the three known values.
+     */
+    function validate(payload, requiredFields) {
+        for (const field of requiredFields) {
+            const value = payload[field];
+            if (value === null || value === undefined || String(value).trim() === "") {
+                return "Please fill in the required field: " + field.replace("_", " ") + ".";
+            }
+        }
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(payload.target_date)) {
+            return "Target date must be in YYYY-MM-DD format.";
+        }
+        if (!STATUSES.includes(payload.status)) {
+            return "Status must be one of: " + STATUSES.join(", ") + ".";
+        }
+        if (payload.name.length > 120) {
+            return "Course name must be 120 characters or fewer.";
+        }
+        return null;
+    }
+
+    /** Marks the offending inputs so the problem is visible, not just described. */
+    function markInvalid(ids) {
+        for (const id of ids) {
+            const input = $(id);
+            if (!input) continue;
+            input.classList.add("invalid");
+            input.addEventListener("input", () => input.classList.remove("invalid"), { once: true });
+        }
+    }
+
+    /**
+     * Highlights the required inputs that are still empty.
+     * `prefix` is "" for the Add form and "edit-" for the modal, because the
+     * element ids follow that convention (name / edit-name, ...).
+     */
+    function markEmptyFields(prefix, payload, requiredFields) {
+        const emptyIds = requiredFields
+            .filter((field) => !payload[field] || String(payload[field]).trim() === "")
+            .map((field) => prefix + field);
+        markInvalid(emptyIds);
+    }
+
+    // ---------------------------------------------------------------------
+    // Wiring everything up
+    // ---------------------------------------------------------------------
+
+    /**
+     * Formats a Date as YYYY-MM-DD in the browser's own time zone.
+     * (Date.toISOString() would switch to UTC and can show the previous day
+     * for anyone east of Greenwich - Kabul, for instance.)
+     */
+    function toLocalDateString(date) {
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return date.getFullYear() + "-" + month + "-" + day;
+    }
+
+    /** Defaults the date input to one month from today - a sensible target. */
+    function setDefaultTargetDate() {
+        const oneMonthAhead = new Date();
+        oneMonthAhead.setMonth(oneMonthAhead.getMonth() + 1);
+        $("target_date").value = toLocalDateString(oneMonthAhead);
+    }
+
+    $("course-form").addEventListener("submit", createCourse);
+    $("edit-form").addEventListener("submit", updateCourse);
+    $("cancel-edit-button").addEventListener("click", closeEditModal);
+    $("refresh-button").addEventListener("click", loadCourses);
+    $("clear-button").addEventListener("click", () => {
+        hideMessage();
+        setTimeout(setDefaultTargetDate, 0);   // after the browser clears the form
+    });
+
+    // Close the modal on Escape or by clicking the dark backdrop.
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && !$("modal-backdrop").hidden) closeEditModal();
+    });
+    $("modal-backdrop").addEventListener("click", (event) => {
+        if (event.target === $("modal-backdrop")) closeEditModal();
+    });
+
+    // First paint.
+    setDefaultTargetDate();
+    loadCourses();
+</script>
+</body>
+</html>

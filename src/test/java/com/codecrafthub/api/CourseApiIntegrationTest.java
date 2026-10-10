@@ -376,6 +376,22 @@ class CourseApiIntegrationTest {
                 .contains("In Progress");
     }
 
+    @Test
+    @DisplayName("the API answers cross-origin requests, so dashboard.html works from Live Server")
+    void crossOriginRequestsAreAllowed() {
+        // The dashboard is usually served from another port (Live Server, e.g. 5500),
+        // which makes it a different origin. The browser only lets it call the API
+        // because WebConfig opts /api/** into CORS.
+        ResponseEntity<String> response = client.get()
+                .uri("/api/courses")
+                .header("Origin", "http://localhost:5500")
+                .retrieve()
+                .toEntity(String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getHeaders().getAccessControlAllowOrigin()).isEqualTo("*");
+    }
+
     // ------------------------------------------------------------------
     // Helpers - keep the tests above short and readable
     // ------------------------------------------------------------------
