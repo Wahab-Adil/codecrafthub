@@ -574,12 +574,51 @@
     // ---------------------------------------------------------------------
     // Change this if your API runs on another port or machine.
     const BACKEND_ORIGIN = "http://localhost:8080";
+    const API_PATH = "/api/courses";
 
-    // If this page is served by the Spring Boot app itself, relative URLs work
-    // and no CORS is involved. Opened from Live Server (or a file), the page has
-    // a different origin, so we call the backend URL above directly.
-    const SERVED_BY_BACKEND = window.location.origin === BACKEND_ORIGIN;
-    const API_BASE = (SERVED_BY_BACKEND ? "" : BACKEND_ORIGIN) + "/api/courses";
+    // Filled in once by resolveApiBase() below.
+    let apiBase = null;
+
+    /**
+     * Works out where to send requests, because this page gets opened in three
+     * different ways:
+     *
+     *   1. Served by Spring Boot itself - same origin as the API, so a relative
+     *      URL is all we need (and no CORS is involved).
+     *   2. Served by Live Server, or by a preview proxy such as the Skills Network
+     *      "Launch Application" page - a different port is a different origin.
+     *      Relative URLs still work if that same server also exposes the API, so
+     *      we send one probe request to find out; if it does not, we call the
+     *      backend directly, which is what CORS in WebConfig.java allows.
+     *   3. Opened straight from the file system (file://) - always call the
+     *      backend directly.
+     *
+     * Case 2 matters more than it looks: when a page is shown through a proxy,
+     * "http://localhost:8080" points at the *viewer's* machine, not the server,
+     * so probing the same origin first is what keeps the dashboard working.
+     */
+    async function resolveApiBase() {
+        if (apiBase) return apiBase;
+
+        if (window.location.origin === BACKEND_ORIGIN) {
+            apiBase = API_PATH;
+            return apiBase;
+        }
+
+        try {
+            const probe = await fetch(API_PATH, { headers: { "Accept": "application/json" } });
+            const contentType = probe.headers.get("content-type") || "";
+            if (probe.ok && contentType.indexOf("application/json") !== -1) {
+                apiBase = API_PATH;
+                return apiBase;
+            }
+        } catch (probeFailed) {
+            // Not served here (file:// or a plain static server) - fall through.
+        }
+
+        apiBase = BACKEND_ORIGIN + API_PATH;
+        return apiBase;
+    }
 
     const STATUSES = ["Not Started", "In Progress", "Completed"];
 
@@ -597,6 +636,8 @@
 
     /**
      * Performs one HTTP request against the API and returns the parsed body.
+     * `subPath` is appended to the resolved base: "" for the collection,
+     * "/3" for one course.
      *
      * Throws an Error with a user-friendly message when:
      *   - the backend cannot be reached at all (not running, wrong port), or
@@ -604,15 +645,16 @@
      *     JSON error body { timestamp, status, error, message, path,
      *     field_errors? }, so we show its own message plus any field details.
      */
-    async function api(path, options = {}) {
+    async function api(subPath = "", options = {}) {
+        const base = await resolveApiBase();
         let response;
         try {
-            response = await fetch(path, Object.assign({
+            response = await fetch(base + subPath, Object.assign({
                 headers: { "Content-Type": "application/json", "Accept": "application/json" }
             }, options));
         } catch (networkError) {
             throw new Error(
-                "Cannot reach the CodeCraftHub API at " + API_BASE +
+                "Cannot reach the CodeCraftHub API at " + base +
                 ". Is the backend running (mvn spring-boot:run)?"
             );
         }
@@ -708,7 +750,7 @@
         setLoading(true, "Loading courses\u2026");
         hideMessage();
         try {
-            courses = await api(API_BASE) || [];
+            courses = await api() || [];
             renderCourses();
         } catch (error) {
             showMessage(error.message, "error");
@@ -810,7 +852,7 @@
 
         setLoading(true, "Saving course\u2026");
         try {
-            const created = await api(API_BASE, {
+            const created = await api("", {
                 method: "POST",
                 body: JSON.stringify(payload)
             });
@@ -875,7 +917,7 @@
         setLoading(true, "Saving changes\u2026");
         try {
             // PUT replaces the whole course, so we always send every field.
-            const updated = await api(API_BASE + "/" + editingId, {
+            const updated = await api("/" + editingId, {
                 method: "PUT",
                 body: JSON.stringify(payload)
             });
@@ -898,7 +940,7 @@
 
         setLoading(true, "Removing course\u2026");
         try {
-            await api(API_BASE + "/" + id, { method: "DELETE" });
+            await api("/" + id, { method: "DELETE" });
             showMessage('Removed "' + name + '".', "success");
             await loadCourses();
         } catch (error) {

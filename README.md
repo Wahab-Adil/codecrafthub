@@ -338,6 +338,14 @@ The backend address is one constant at the top of the `<script>` block:
 const BACKEND_ORIGIN = "http://localhost:8080";   // change this if your API runs elsewhere
 ```
 
+Before its first request the page works out where the API really is
+(`resolveApiBase()`). If the page was served by the backend's own origin it uses
+relative URLs. Otherwise it sends one probe request to the same origin, and only falls
+back to `BACKEND_ORIGIN` when that probe does not answer with JSON. That last step is
+what makes the dashboard work in the lab's **Launch Application** flow: there the page
+is shown through a proxy, so a hard-coded `http://localhost:8080` would point at the
+viewer's own machine instead of the server.
+
 ### 7.2 `src/main/resources/static/index.html` - served by the app itself
 
 Open **http://localhost:8080/** in your browser while the app is running.
